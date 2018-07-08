@@ -32,8 +32,9 @@ class Commands:
     def load_ext(self, path, update=None):
         try:
             setup = getattr(importlib.import_module(path), "setup")
-        except AttributeError:
+        except (AttributeError, ModuleNotFoundError):
             self.bot.send_message(chat_id=update.message.chat_id, text="Invalid extension")
+            return
         ext = setup(self.bot, self.config)
         for cmd in ext.cmd_list:
             self.add(cmd)
