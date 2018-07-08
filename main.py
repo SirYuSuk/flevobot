@@ -21,6 +21,11 @@ except FileNotFoundError:
     exit(1)
 
 
+# --- Initialize bot ---
+updater = Updater(token=config['token'])
+bot = updater.bot
+
+
 # --- Set prefixes ---
 prefixes = ""
 for pre in config['prefix']:
@@ -30,7 +35,7 @@ for pre in config['prefix']:
 
 
 # --- Initialize command logic ---
-cmds = Commands()
+cmds = Commands(bot, config)
 for ext in config['extension']:
     cmds.load_ext(ext)
 
@@ -47,18 +52,27 @@ def get_arguments(message):
         return []
 
 
+def is_owner(update):
+    if update.message.from_user.id == config['owner']:
+        return True
+    else:
+        bot.send_message(chat_id=update.message.chat_id, text="Insufficient permissions")
+        return False
+
+
 # --- Built-in commands ---
 # help command
-def help(bot, update, args=None):
+def help(update, args=None):
     """Sends this message"""
     global cmds
+    global bot
     help_msg = ""
     if args != None:
         try:
-            cmd = cmds.get_cmd(args[0])
+            cmd = cmds.get_cmd(args[0].lower())
             help_msg = f"*{cmd.name}*: `{cmd.help}`"
         except IndexError:
-            help_msg = f"Command: `{args[0]}` not found!"
+            help_msg = f"Command `{args[0]}` not found!"
     else:
         for cmd in sorted(cmds.cmds, key=lambda x: x.name):
             help_msg += f"*{cmd.name}*: `{cmd.help}`\n"
@@ -66,17 +80,22 @@ def help(bot, update, args=None):
 
 
 # load command
-def load(bot, update):
+def load(update, args):
     """Loads a new extension"""
+    if not is_owner(update):
+        return
     global cmds
-    cmds.load_ext(get_arguments(update.message.text))
+    cmds.load_ext(args[0])
 
 
 # unload command
-def unload(bot, update):
+def unload(update, args):
     """Unloads a given extension"""
+    if not is_owner(update):
+        return
     global cmds
-    cmds.unload_ext(get_arguments(update.message.text))
+    
+    cmds.unload_ext(args[0])
 
 
 cmds.add(help)
@@ -84,8 +103,7 @@ cmds.add(load)
 cmds.add(unload)
 
 
-# --- Initialize bot ---
-updater = Updater(token=config['token'])
+# --- Finish initializing bot ---
 botinfo = updater.bot.get_me()
 print(f"Bot: {botinfo['first_name']}\nID: {botinfo['id']}")
 dispatcher = updater.dispatcher

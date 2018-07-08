@@ -2,7 +2,10 @@ import importlib
 
 
 class Commands:
-    cmds = []
+    def __init__(self, bot, config):
+        self.cmds = []
+        self.bot = bot
+        self.config = config
     
 
     def add(self, func):
@@ -16,19 +19,20 @@ class Commands:
     def run(self, name, bot, update, args):
         if len(args) == 0:
             try:
-                self.get_cmd(name).func(bot, update)
+                self.get_cmd(name).func(update)
             except TypeError:
                 bot.send_message(chat_id=update.message.chat_id, text=f"Too few arguments for command: `{name}`", parse_mode="Markdown")
         else:
             try:
-                self.get_cmd(name).func(bot, update, args)
+                self.get_cmd(name).func(update, args)
             except TypeError:
                 bot.send_message(chat_id=update.message.chat_id, text=f"Too many arguments for command: `{name}`", parse_mode="Markdown")
 
 
     def load_ext(self, path):
-        ext_cmds = getattr(importlib.import_module(path), "cmd_list")
-        for cmd in ext_cmds:
+        setup = getattr(importlib.import_module(path), "setup")
+        ext = setup(self.bot, self.config)
+        for cmd in ext.cmd_list:
             self.add(cmd)
 
     def unload_ext(self, path):
