@@ -3,6 +3,7 @@ import re
 import telegram
 import yaml
 from commands import Commands
+from telegram.ext import MessageHandler
 from telegram.ext import RegexHandler
 from telegram.ext import Updater
 
@@ -36,13 +37,12 @@ for pre in config['prefix']:
 
 # --- Initialize command logic ---
 cmds = Commands(bot, config)
-for ext in config['extension']:
-    cmds.load_ext(ext)
+try:
+    for ext in config['extension']:
+        cmds.load_ext(ext)
+except TypeError:
+    print("No extensions present in config")
 
-
-def command(bot, update):
-    cmd_match = re.search(r"(" + prefixes + r")([^\s]+)(( )(.+)|)", update.message.text)
-    cmds.run(cmd_match[2], bot, update, get_arguments(update.message.text))
 
 def get_arguments(message):
     cmd_match = re.search(r"(" + prefixes + r")([^\s]+)(( )(.+)|)", message)
@@ -103,12 +103,25 @@ cmds.add(load)
 cmds.add(unload)
 
 
+# --- Handler callback ---
+def command(bot, update):
+    cmd_match = re.search(r"(" + prefixes + r")([^\s]+)(( )(.+)|)", update.message.text)
+    cmds.run(cmd_match[2], bot, update, get_arguments(update.message.text))
+
+
+def new_title(bot, update):
+    with open("names.txt", "a") as myfile:
+        myfile.write(f"\n{update.message.chat_id}: {update.message.new_chat_title}")
+
+
+
+
 # --- Finish initializing bot ---
 botinfo = updater.bot.get_me()
 print(f"Bot: {botinfo['first_name']}\nID: {botinfo['id']}")
 dispatcher = updater.dispatcher
-command_handler = RegexHandler(r"(" + prefixes + r")(.+)", command)
-dispatcher.add_handler(command_handler)
+dispatcher.add_handler(RegexHandler(r"(" + prefixes + r")(.+)", command))
+dispatcher.add_handler(MessageHandler(telegram.ext.Filters.status_update.new_chat_title, new_title))
 
 
 
