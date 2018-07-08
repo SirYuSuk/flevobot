@@ -108,3 +108,6 @@ venv.bak/
 
 # bot config
 config.yaml
+
+# bot extensions
+ext/
