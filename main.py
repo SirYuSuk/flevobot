@@ -26,6 +26,9 @@ for pre in config['prefix']:
 # commands
 cmds = Commands()
 
+for ext in config['extension']:
+    cmds.load_ext(ext)
+
 def test(bot, update):
     bot.send_message(chat_id=update.message.chat_id, text="test")
 
@@ -34,8 +37,8 @@ cmds.add("test", test)
 
 
 def command(bot, update):
-    cmd_match = re.search(r"(" + prefixes + ")([^\s]*)(( )(.*)|)", update.message.text)
-    bot.send_message(chat_id=update.message.chat_id, text=cmd_match[2])
+    cmd_match = re.search(r"(" + prefixes + r")([^\s]+)(( )(.+)|)", update.message.text)
+    bot.send_message(chat_id=update.message.chat_id, text=f"Command: {cmd_match[2]}")
     cmds.run(cmd_match[2], bot, update)
 
 
@@ -44,7 +47,7 @@ updater = Updater(token=config['token'])
 botinfo = updater.bot.get_me()
 print(f"Bot: {botinfo['first_name']}\nID: {botinfo['id']}")
 dispatcher = updater.dispatcher
-command_handler = RegexHandler(r"(>|f/|f!)(.*)", command)
+command_handler = RegexHandler(r"(" + prefixes + r")(.+)", command)
 dispatcher.add_handler(command_handler)
 
 
