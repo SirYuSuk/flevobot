@@ -29,8 +29,11 @@ class Commands:
                 bot.send_message(chat_id=update.message.chat_id, text=f"Too many arguments for command: `{name}`", parse_mode="Markdown")
 
 
-    def load_ext(self, path):
-        setup = getattr(importlib.import_module(path), "setup")
+    def load_ext(self, path, update=None):
+        try:
+            setup = getattr(importlib.import_module(path), "setup")
+        except AttributeError:
+            self.bot.send_message(chat_id=update.message.chat_id, text="Invalid extension")
         ext = setup(self.bot, self.config)
         for cmd in ext.cmd_list:
             self.add(cmd)

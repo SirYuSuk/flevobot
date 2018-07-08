@@ -85,7 +85,7 @@ def load(update, args):
     if not is_owner(update):
         return
     global cmds
-    cmds.load_ext(args[0])
+    cmds.load_ext(args[0], update)
 
 
 # unload command
