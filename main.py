@@ -25,21 +25,24 @@ for pre in config['prefix']:
 
 # commands
 cmds = Commands()
-
 for ext in config['extension']:
     cmds.load_ext(ext)
-
-def test(bot, update):
-    bot.send_message(chat_id=update.message.chat_id, text="test")
-
-
-cmds.add("test", test)
 
 
 def command(bot, update):
     cmd_match = re.search(r"(" + prefixes + r")([^\s]+)(( )(.+)|)", update.message.text)
     bot.send_message(chat_id=update.message.chat_id, text=f"Command: {cmd_match[2]}")
     cmds.run(cmd_match[2], bot, update)
+
+
+# help command
+def help(bot, update):
+    """Sends this message"""
+    global cmds
+    bot.send_message(chat_id=update.message.chat_id, text="test")
+
+
+cmds.add(help)
 
 
 # initialize bot
@@ -51,12 +54,7 @@ command_handler = RegexHandler(r"(" + prefixes + r")(.+)", command)
 dispatcher.add_handler(command_handler)
 
 
-def main():
-    print(config)
-    #v = 1
-
 
 if __name__ == "__main__":
-    main()
     updater.start_polling()
     updater.idle()
