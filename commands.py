@@ -21,19 +21,19 @@ class Commands:
             try:
                 self.get_cmd(name).func(update)
             except TypeError:
-                bot.send_message(chat_id=update.message.chat_id, text=f"Too few arguments for command: `{name}`", parse_mode="Markdown")
+                bot.send_message(chat_id=update.message.chat_id, text=f"Te weinig argumenten voor commando: `{name}`", parse_mode="Markdown")
         else:
             try:
                 self.get_cmd(name).func(update, args)
             except TypeError:
-                bot.send_message(chat_id=update.message.chat_id, text=f"Too many arguments for command: `{name}`", parse_mode="Markdown")
+                bot.send_message(chat_id=update.message.chat_id, text=f"Te veel argumenten voor commando: `{name}`", parse_mode="Markdown")
 
 
     def load_ext(self, path, update=None):
         try:
             setup = getattr(importlib.import_module(path), "setup")
         except (AttributeError, ModuleNotFoundError):
-            self.bot.send_message(chat_id=update.message.chat_id, text="Invalid extension")
+            self.bot.send_message(chat_id=update.message.chat_id, text="Ongeldige extensie")
             return
         ext = setup(self.bot, self.config)
         for cmd in ext.cmd_list:

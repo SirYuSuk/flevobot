@@ -56,14 +56,14 @@ def is_owner(update):
     if update.message.from_user.id == config['owner']:
         return True
     else:
-        bot.send_message(chat_id=update.message.chat_id, text="Insufficient permissions")
+        bot.send_message(chat_id=update.message.chat_id, text="Niet toegestaan")
         return False
 
 
 # --- Built-in commands ---
 # help command
 def help(update, args=None):
-    """Sends this message"""
+    """Toont dit bericht"""
     global cmds
     global bot
     help_msg = ""
@@ -81,7 +81,7 @@ def help(update, args=None):
 
 # load command
 def load(update, args):
-    """Loads a new extension"""
+    """Laad een nieuwe extensie"""
     if not is_owner(update):
         return
     global cmds
@@ -90,7 +90,7 @@ def load(update, args):
 
 # unload command
 def unload(update, args):
-    """Unloads a given extension"""
+    """Ontkoppelt een gegeven extensie"""
     if not is_owner(update):
         return
     global cmds
