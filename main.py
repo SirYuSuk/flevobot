@@ -81,7 +81,7 @@ def help(update, args=None):
 
 # load command
 def load(update, args):
-    """Laad een nieuwe extensie"""
+    """Laadt een nieuwe extensie"""
     if not is_owner(update):
         return
     global cmds
