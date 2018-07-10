@@ -109,8 +109,5 @@ venv.bak/
 # bot config
 config.yaml
 
-# bot extensions
-ext/
-
 # channel name log
 names.txt

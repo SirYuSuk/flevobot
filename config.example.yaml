@@ -4,6 +4,7 @@ prefix:
   - ">"
   - "f/"
   - "f!"
+extension:
 api:
   voorbeeld: bami.party sate
 
