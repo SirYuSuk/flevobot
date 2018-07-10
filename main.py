@@ -6,6 +6,7 @@ from commands import Commands
 from telegram.ext import MessageHandler
 from telegram.ext import RegexHandler
 from telegram.ext import Updater
+from telegram.ext.dispatcher import run_async
 
 
 # --- Enable logging ---
@@ -94,7 +95,7 @@ def unload(update, args):
     if not is_owner(update):
         return
     global cmds
-    
+
     cmds.unload_ext(args[0])
 
 
@@ -104,6 +105,7 @@ cmds.add(unload)
 
 
 # --- Handler callback ---
+@run_async
 def command(bot, update):
     cmd_match = re.search(r"(" + prefixes + r")([^\s]+)(( )(.+)|)", update.message.text)
     cmds.run(cmd_match[2], bot, update, get_arguments(update.message.text))
