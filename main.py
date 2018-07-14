@@ -3,6 +3,8 @@ import re
 import telegram
 import yaml
 from commands import Commands
+from ctx import CTX
+from checks import Checks
 from telegram.ext import MessageHandler
 from telegram.ext import RegexHandler
 from telegram.ext import Updater
@@ -63,40 +65,41 @@ def is_owner(update):
 
 # --- Built-in commands ---
 # help command
-def help(update, args=None):
+def help(ctx):
     """Toont dit bericht"""
     global cmds
     global bot
     help_msg = ""
-    if args != None:
+    if ctx.args != None:
         try:
-            cmd = cmds.get_cmd(args[0].lower())
-            help_msg = f"*{cmd.name}*: `{cmd.help}`"
+            cmd = cmds.get_cmd(ctx.args[0].lower())
+            help_msg = f"`{cmd.name}`: {cmd.help}"
         except IndexError:
-            help_msg = f"Command `{args[0]}` not found!"
+            help_msg = f"Command `{ctx.args[0]}` not found!"
     else:
+        help_msg += "*De volgende commando's zijn beschikbaar:*\n"
         for cmd in sorted(cmds.cmds, key=lambda x: x.name):
-            help_msg += f"*{cmd.name}*: `{cmd.help}`\n"
-    bot.send_message(chat_id=update.message.chat_id, text=help_msg, parse_mode="Markdown")
+            help_msg += f"`{cmd.name}`: {cmd.help}\n"
+    ctx.bot.send_message(chat_id=ctx.update.message.chat_id, text=help_msg, parse_mode="Markdown")
 
 
 # load command
-def load(update, args):
+def load(ctx):
     """Laadt een nieuwe extensie"""
-    if not is_owner(update):
+    if not is_owner(ctx.update):
         return
     global cmds
-    cmds.load_ext(args[0], update)
+    cmds.load_ext(ctx.args[0], ctx.update)
 
 
 # unload command
-def unload(update, args):
+def unload(ctx):
     """Ontkoppelt een gegeven extensie"""
-    if not is_owner(update):
+    if not is_owner(ctx.update):
         return
     global cmds
 
-    cmds.unload_ext(args[0])
+    cmds.unload_ext(ctx.args[0])
 
 
 cmds.add(help)
@@ -108,7 +111,12 @@ cmds.add(unload)
 @run_async
 def command(bot, update):
     cmd_match = re.search(r"(" + prefixes + r")([^\s]+)(( )(.+)|)", update.message.text)
-    cmds.run(cmd_match[2], bot, update, get_arguments(update.message.text))
+    args = get_arguments(update.message.text)
+    if len(args) == 0:
+        cmds.run(cmd_match[2], CTX(bot, config, Checks(bot), update, None))
+    else:
+        cmds.run(cmd_match[2], CTX(bot, config, Checks(bot), update, get_arguments(update.message.text)))
+
 
 
 def new_title(bot, update):

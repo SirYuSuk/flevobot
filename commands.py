@@ -16,18 +16,10 @@ class Commands:
         self.cmds.remove(self.get_cmd(name))
 
     
-    def run(self, name, bot, update, args):
-        if len(args) == 0:
-            try:
-                self.get_cmd(name).func(update)
-            except TypeError:
-                bot.send_message(chat_id=update.message.chat_id, text=f"Te weinig argumenten voor commando: `{name}`", parse_mode="Markdown")
-        else:
-            try:
-                self.get_cmd(name).func(update, args)
-            except TypeError:
-                bot.send_message(chat_id=update.message.chat_id, text=f"Te veel argumenten voor commando: `{name}`", parse_mode="Markdown")
-
+    def run(self, name, ctx):
+            self.get_cmd(name).func(ctx)
+            #self.bot.send_message(chat_id=ctx.update.message.chat_id, text=f"Te weinig argumenten voor commando: `{name}`", parse_mode="Markdown")
+        
 
     def load_ext(self, path, update=None):
         try:
